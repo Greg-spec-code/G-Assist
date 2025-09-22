@@ -121,7 +121,7 @@ const GAssistChatbot = () => {
   const handleSubmit = async (e: React.FormEvent | React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     if (!userInput.trim()) return;
-
+  
     // Add user message to chat
     const newUserMessage = {
       id: Date.now().toString(),
@@ -129,11 +129,11 @@ const GAssistChatbot = () => {
       content: userInput,
       timestamp: new Date()
     };
-
+  
     setMessages(prev => [...prev, newUserMessage]);
     setUserInput("");
     setIsLoading(true);
-
+  
     try {
       // Call OpenRouter API with Google Gemini model
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -145,7 +145,9 @@ const GAssistChatbot = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          "model": "google/gemini-2.0-flash-exp:free",
+          // This line correctly specifies the model you want to use
+         "model": "google/gemini-2.0-flash-exp:free",
+
           "messages": [
             ...messages.filter(m => m.role !== 'system').map(m => ({
               role: m.role,
@@ -158,13 +160,18 @@ const GAssistChatbot = () => {
           ]
         })
       });
-
+  
       if (!response.ok) {
-        throw new Error('API request failed');
+        // Get more specific error information
+        const errorData = await response.text();
+        console.error(`API Error ${response.status}:`, errorData);
+        throw new Error(`API request failed with status ${response.status}: ${errorData}`);
       }
-
+  
+      // *** THIS IS THE FIX ***
+      // You must parse the JSON from the response body AFTER you know the request was successful.
       const data = await response.json();
-      
+  
       // Add AI response
       const aiResponse = {
         id: (Date.now() + 1).toString(),
@@ -172,7 +179,7 @@ const GAssistChatbot = () => {
         content: data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response. Please try again.",
         timestamp: new Date()
       };
-      
+  
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
       console.error("Error:", error);
@@ -187,7 +194,6 @@ const GAssistChatbot = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <FloatingParticles />

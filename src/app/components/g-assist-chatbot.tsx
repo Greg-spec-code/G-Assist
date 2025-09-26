@@ -275,130 +275,132 @@ const GAssistChatbot = () => {
           </div>
         </div>
 
-        {/* Chat Messages with beautiful<div className="h-80 overflow-y-auto p-3 bg-gradient-to-b from-black/5 to-transparent relative"> styling */}
+{/* Chat Messages with beautiful styling */}
+<div className="h-80 overflow-y-auto p-3 bg-gradient-to-b from-black/5 to-transparent relative">
+    {messages.length === 0 ? (
+    <div className="h-full flex flex-col items-center justify-center text-center p-2">
+        <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: "spring" }}
+        className="mb-4 p-3 rounded-full bg-gradient-to-r from-blue-500/20 to-green-500/20"
+        >
+        <Wand2 className="h-8 w-8 text-blue-300" />
+        </motion.div>
         
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-4">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring" }}
-                className="mb-6 p-4 rounded-full bg-gradient-to-r from-blue-500/20 to-green-500/20"
-              >
-                <Wand2 className="h-12 w-12 text-blue-300" />
-              </motion.div>
-              
-              <motion.h3 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-2xl font-bold text-white mb-2"
-              >
-                Welcome to G-Assist
-              </motion.h3>
-              
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-blue-200 max-w-md"
-              >
-                Start a conversation with Google Gemini AI. I can help you with coding, answer questions, and assist with creative tasks.
-              </motion.p>
-              
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 w-full max-w-md"
-              >
-                {[
-                  "Explain quantum computing",
-                  "Write Python code",
-                  "Creative story ideas",
-                  "Solve math problems"
-                ].map((suggestion, i) => (
-                  <motion.div
-                    key={i}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center text-xs text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                    onClick={() => setUserInput(suggestion)}
-                  >
-                    {suggestion}
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <AnimatePresence>
-                {messages.map((msg) => (
-                  <motion.div 
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div 
-                      className={`max-w-[85%] rounded-3xl px-4 py-2 relative overflow-hidden ${
-                        msg.role === 'user' 
-                          ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-br-none' 
-                          : 'bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-bl-none'
-                      }`}
-                    >
-                      {msg.role === 'assistant' && (
-                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-cyan-500/10 to-green-500/10"></div>
-                      )}
-                      <div className="relative z-10">
-                        <div className="flex items-start gap-3">
-                          {msg.role === 'assistant' ? (
-                            <div className="mt-1 p-1.5 rounded-lg bg-gradient-to-r from-cyan-500/30 to-green-500/30">
-                              <Brain className="h-4 w-4 text-cyan-300" />
-                            </div>
-                          ) : (
-                            <div className="mt-1 p-1.5 rounded-lg bg-gradient-to-r from-blue-500/30 to-teal-500/30">
-                              <MessageCircle className="h-4 w-4 text-blue-300" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-medium mb-1">
-                              {msg.role === 'user' ? 'You' : 'G-Assist'}
-                            </p>
-                            <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                          </div>
-                        </div>
-                      </div>
+        <motion.h3 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="text-xl font-bold text-white mb-1"
+        >
+        Welcome to G-Assist
+        </motion.h3>
+        
+        <motion.p 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="text-sm text-blue-200 max-w-md"
+        >
+        Start a conversation with Google Gemini AI. I can help you with coding, answer questions, and assist with creative tasks.
+        </motion.p>
+        
+        <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-6 w-full max-w-md"
+        >
+        {[
+            "Explain quantum computing",
+            "Write Python code",
+            "Creative story ideas",
+            "Solve math problems"
+        ].map((suggestion, i) => (
+            <motion.div
+            key={i}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center text-xs text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
+            onClick={() => setUserInput(suggestion)}
+            >
+            {suggestion}
+            </motion.div>
+        ))}
+        </motion.div>
+    </div>
+    ) : (
+    <div className="space-y-4">
+        <AnimatePresence>
+        {messages.map((msg) => (
+            <motion.div 
+            key={msg.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+            <div 
+                className={`max-w-[85%] rounded-2xl px-4 py-2 relative overflow-hidden text-sm ${
+                msg.role === 'user' 
+                    ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-br-none' 
+                    : 'bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-bl-none'
+                }`}
+            >
+                {msg.role === 'assistant' && (
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-cyan-500/10 to-green-500/10"></div>
+                )}
+                <div className="relative z-10">
+                <div className="flex items-start gap-2">
+                    {msg.role === 'assistant' ? (
+                    <div className="mt-1 p-1 rounded-md bg-gradient-to-r from-cyan-500/30 to-green-500/30">
+                        <Brain className="h-4 w-4 text-cyan-300" />
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              
-              {isTyping && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex justify-start"
-                >
-                  <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl rounded-bl-none px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"></div>
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce delay-100"></div>
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce delay-200"></div>
-                      </div>
-                      <span className="text-cyan-300 text-sm">G-Assist is thinking...</span>
+                    ) : (
+                    <div className="mt-1 p-1 rounded-md bg-gradient-to-r from-blue-500/30 to-teal-500/30">
+                        <MessageCircle className="h-4 w-4 text-blue-300" />
                     </div>
-                  </div>
-                </motion.div>
-              )}
-              
-              <div ref={messagesEndRef} />
+                    )}
+                    <div>
+                    <p className="font-medium mb-0.5">
+                        {msg.role === 'user' ? 'You' : 'G-Assist'}
+                    </p>
+                    <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                </div>
+                </div>
             </div>
-          )}
-        </div>
+            </motion.div>
+        ))}
+        </AnimatePresence>
+        
+        {isTyping && (
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-start"
+        >
+            <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl rounded-bl-none px-4 py-2">
+            <div className="flex items-center gap-2">
+                <div className="flex space-x-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-100"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-200"></div>
+                </div>
+                <span className="text-cyan-300 text-xs">G-Assist is thinking...</span>
+            </div>
+            </div>
+        </motion.div>
+        )}
+        
+        <div ref={messagesEndRef} />
+    </div>
+    )}
+</div>```
+
+
 
         {/* Chat Input Section with enhanced design */}
         <div className="p-3 bg-black/10 border-t border-white/10">

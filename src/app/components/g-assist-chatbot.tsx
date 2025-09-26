@@ -454,41 +454,41 @@ const GAssistChatbot = () => {
         </div>
 
         {/* Features Section with beautiful cards */}
-        <div className="p-3 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            {[
-              { 
-                icon: <Zap className="h-6 w-6 text-yellow-400" />, 
-                title: "Google Gemini", 
-                desc: "Powered by cutting-edge AI" 
-              },
-              { 
-                icon: <Sparkles className="h-6 w-6 text-cyan-400" />, 
-                title: "Free to Use", 
-                desc: "No API key required" 
-              },
-              { 
-                icon: <Star className="h-6 w-6 text-green-400" fill="currentColor" />, 
-                title: "Lightning Fast", 
-                desc: "Instant AI responses" 
-              }
-            ].map((feature, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ y: -5 }}
-                className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:border-white/20 transition-all duration-300"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-white/10">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
-                </div>
-                <p className="text-blue-200">{feature.desc}</p>
-              </motion.div>
-            ))}
+<div className="p-3 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+    {[
+      {
+        icon: <Zap className="h-5 w-5 text-yellow-400" />,
+        title: "Google Gemini",
+        desc: "Powered by cutting-edge AI"
+      },
+      {
+        icon: <Sparkles className="h-5 w-5 text-cyan-400" />,
+        title: "Free to Use",
+        desc: "No API key required"
+      },
+      {
+        icon: <Star className="h-5 w-5 text-green-400" fill="currentColor" />,
+        title: "Lightning Fast",
+        desc: "Instant AI responses"
+      }
+    ].map((feature, i) => (
+      <motion.div
+        key={i}
+        whileHover={{ y: -5 }}
+        className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:border-white/20 transition-all duration-300"
+      >
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="p-1.5 rounded-md bg-white/10">
+            {feature.icon}
           </div>
+          <h3 className="text-base font-semibold text-white">{feature.title}</h3>
         </div>
+        <p className="text-sm text-blue-200">{feature.desc}</p>
+      </motion.div>
+    ))}
+  </div>
+</div>
       </motion.div>
       
       {/* Footer with subtle animation */}

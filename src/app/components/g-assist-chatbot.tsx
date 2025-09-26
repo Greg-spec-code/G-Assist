@@ -195,7 +195,7 @@ const GAssistChatbot = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-2 md:p-4 relative overflow-hidden">
       <FloatingParticles />
       
       {/* Decorative elements */}
@@ -207,7 +207,7 @@ const GAssistChatbot = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-4xl bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative z-10"
+        className="w-full max-w-4xl bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/20 relative z-10"
       >
         {/* Header Section with gradient and decorative elements */}
         <div className="relative overflow-hidden">
@@ -215,17 +215,17 @@ const GAssistChatbot = () => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-400/30 to-green-500/30 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-cyan-400/30 to-blue-500/30 rounded-full translate-y-24 -translate-x-24 blur-3xl"></div>
           
-          <div className="relative p-8 text-center z-10">
+          <div className="relative p-4 text-center z-10">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="flex justify-center mb-4"
+              className="flex justify-center mb-2"
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-500 rounded-full blur-lg opacity-70"></div>
-                <div className="relative w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-green-500 flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-white" />
+                <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-green-500 flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-white" />
                 </div>
               </div>
             </motion.div>
@@ -234,7 +234,7 @@ const GAssistChatbot = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-4xl md:text-5xl font-bold text-white mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-white to-green-300"
+              className="text-3xl md:text-4xl font-bold text-white mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-white to-green-300"
             >
               G-Assist
             </motion.h1>
@@ -243,7 +243,7 @@ const GAssistChatbot = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-xl text-blue-100 max-w-2xl mx-auto font-light"
+              className="text-base text-blue-100 max-w-2xl mx-auto font-light"
             >
               Powered by Google Gemini 2.0 Flash - Your intelligent AI assistant
             </motion.p>
@@ -252,7 +252,7 @@ const GAssistChatbot = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="flex justify-center gap-2 mt-4"
+              className="flex justify-center gap-1 mt-2"
             >
               {[...Array(5)].map((_, i) => (
                 <motion.div
@@ -268,15 +268,15 @@ const GAssistChatbot = () => {
                     repeatDelay: 3
                   }}
                 >
-                  <Star className="h-5 w-5 text-yellow-300" fill="currentColor" />
+                  <Star className="h-4 w-4 text-yellow-300" fill="currentColor" />
                 </motion.div>
               ))}
             </motion.div>
           </div>
         </div>
 
-        {/* Chat Messages with beautiful styling */}
-        <div className="h-96 overflow-y-auto p-6 bg-gradient-to-b from-black/5 to-transparent relative">
+        {/* Chat Messages with beautiful<div className="h-80 overflow-y-auto p-3 bg-gradient-to-b from-black/5 to-transparent relative"> styling */}
+        
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-4">
               <motion.div
@@ -322,7 +322,7 @@ const GAssistChatbot = () => {
                     key={i}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center text-sm text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
+                    className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center text-xs text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
                     onClick={() => setUserInput(suggestion)}
                   >
                     {suggestion}
@@ -331,7 +331,7 @@ const GAssistChatbot = () => {
               </motion.div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <AnimatePresence>
                 {messages.map((msg) => (
                   <motion.div 
@@ -343,7 +343,7 @@ const GAssistChatbot = () => {
                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div 
-                      className={`max-w-[85%] rounded-3xl px-5 py-4 relative overflow-hidden ${
+                      className={`max-w-[85%] rounded-3xl px-4 py-2 relative overflow-hidden ${
                         msg.role === 'user' 
                           ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-br-none' 
                           : 'bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-bl-none'
@@ -401,7 +401,7 @@ const GAssistChatbot = () => {
         </div>
 
         {/* Chat Input Section with enhanced design */}
-        <div className="p-6 bg-black/10 border-t border-white/10">
+        <div className="p-3 bg-black/10 border-t border-white/10">
           <div className="relative">
             <Textarea
               value={userInput}
@@ -413,30 +413,30 @@ const GAssistChatbot = () => {
                   handleSubmit(e);
                 }
               }}
-              className="min-h-[120px] w-full rounded-2xl border border-white/20 bg-white/10 backdrop-blur-lg p-4 pr-16 text-lg text-white placeholder:text-white/60 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 focus:ring-opacity-50 resize-none"
+              className="min-h-[60px] w-full rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg p-3 pr-14 text-base text-white placeholder:text-white/60 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 focus:ring-opacity-50 resize-none"
               disabled={isLoading}
             />
             
             <Button 
               onClick={handleSubmit}
               size="icon" 
-              className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 shadow-lg shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="absolute bottom-2.5 right-2.5 h-10 w-10 rounded-lg bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 shadow-lg shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
               disabled={isLoading || !userInput.trim()}
             >
-              <Send className="h-5 w-5 text-white" />
+              <Send className="h-4 w-4 text-white" />
             </Button>
           </div>
 
           {/* Action Buttons with beautiful styling */}
-          <div className="flex justify-center gap-4 mt-4">
+          <div className="flex justify-center gap-2 mt-2">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-12 w-12 rounded-full border border-white/30 bg-white/10 backdrop-blur-lg hover:bg-white/20 disabled:opacity-50"
+                className="h-10 w-10 rounded-full border border-white/30 bg-white/10 backdrop-blur-lg hover:bg-white/20 disabled:opacity-50"
                 disabled={isLoading}
               >
-                <Mic className="h-5 w-5 text-cyan-300" />
+                <Mic className="h-4 w-4 text-cyan-300" />
               </Button>
             </motion.div>
             
@@ -447,15 +447,15 @@ const GAssistChatbot = () => {
                 className="h-12 w-12 rounded-full border border-white/30 bg-white/10 backdrop-blur-lg hover:bg-white/20 disabled:opacity-50"
                 disabled={isLoading}
               >
-                <Paperclip className="h-5 w-5 text-cyan-300" />
+                <Paperclip className="h-4 w-4 text-cyan-300" />
               </Button>
             </motion.div>
           </div>
         </div>
 
         {/* Features Section with beautiful cards */}
-        <div className="p-6 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-3 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             {[
               { 
                 icon: <Zap className="h-6 w-6 text-yellow-400" />, 
@@ -476,7 +476,7 @@ const GAssistChatbot = () => {
               <motion.div
                 key={i}
                 whileHover={{ y: -5 }}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300"
+                className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:border-white/20 transition-all duration-300"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-lg bg-white/10">
@@ -496,7 +496,7 @@ const GAssistChatbot = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="mt-8 text-center text-white/60 text-sm"
+        className="mt-4 text-center text-white/60 text-sm"
       >
         <p>Powered by Google Gemini 2.0 Flash • Your intelligent AI assistant</p>
       </motion.div>

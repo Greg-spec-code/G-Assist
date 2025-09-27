@@ -3,19 +3,22 @@
 /* Tailwind CSS imports */
 @import "tailwindcss";
 
-/* Water animations */
+/* --- KEYFRAME ANIMATIONS --- */
+
+/* For the water surface waves */
 @keyframes wave {
   0% {
-    d: path("M0,10 Q250,20 500,10 T1000,10 L1000,100 L0,100 Z");
+    d: path("M0,10 Q250,20 500,10 T1000,10");
   }
   50% {
-    d: path("M0,15 Q250,5 500,15 T1000,15 L1000,100 L0,100 Z");
+    d: path("M0,15 Q250,5 500,15 T1000,15");
   }
   100% {
-    d: path("M0,10 Q250,20 500,10 T1000,10 L1000,100 L0,100 Z");
+    d: path("M0,10 Q250,20 500,10 T1000,10");
   }
 }
 
+/* For the initial screen fill */
 @keyframes waterFill {
   from {
     transform: translateY(100%);
@@ -25,64 +28,65 @@
   }
 }
 
+/* For the rising bubbles */
 @keyframes bubble {
   0% {
     transform: translateY(0) translateX(0);
     opacity: 0;
   }
   10% {
-    opacity: 0.6;
-  }
-  50% {
     opacity: 0.8;
-    transform: translateY(-50vh) translateX(10px);
+  }
+  90% {
+    opacity: 0.8;
   }
   100% {
     opacity: 0;
-    transform: translateY(-100vh) translateX(-10px);
+    transform: translateY(-100vh) translateX(var(--bubble-x-end, 0));
   }
 }
 
+/* For the input ripple effect */
 @keyframes ripple {
-  0% {
+  from {
     transform: scale(0);
     opacity: 1;
   }
-  100% {
+  to {
     transform: scale(4);
     opacity: 0;
   }
 }
 
+/* For the gentle bobbing of messages */
 @keyframes float {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
 }
 
-@keyframes pour {
-  0% {
-    height: 0;
-    opacity: 0;
+/* For the subtle swaying of light rays */
+@keyframes sway {
+  0%, 100% {
+    transform: translateX(-10px) rotate(-5deg);
+    opacity: 0.2;
   }
   50% {
-    opacity: 1;
-  }
-  100% {
-    height: 100%;
-    opacity: 0;
+    transform: translateX(10px) rotate(5deg);
+    opacity: 0.4;
   }
 }
 
-/* Base styles */
+
+/* --- BASE STYLES & COLOR VARIABLES --- */
 @layer base {
   :root {
-    --water-primary: 34, 211, 238;
-    --water-secondary: 59, 130, 246;
-    --water-accent: 147, 197, 253;
+    --water-primary: 34, 211, 238;   /* cyan-400 */
+    --water-secondary: 59, 130, 246; /* blue-500 */
+    --water-accent: 147, 197, 253;  /* blue-300 */
     --bubble-color: 255, 255, 255;
   }
 }
@@ -91,108 +95,74 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow: hidden; /* Prevent scrollbars from the main page */
 }
 
-/* Water effect classes */
+/* --- THEME-SPECIFIC UTILITY CLASSES --- */
+
+/* Gradient for the main water body */
 .water-gradient {
   background: linear-gradient(
     180deg,
-    rgba(var(--water-accent), 0.3) 0%,
-    rgba(var(--water-primary), 0.6) 50%,
+    rgba(var(--water-accent), 0.5) 0%,
+    rgba(var(--water-primary), 0.7) 40%,
     rgba(var(--water-secondary), 0.9) 100%
   );
 }
 
-.water-surface {
-  position: relative;
-  overflow: hidden;
-}
-
-.water-surface::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -100%;
-  width: 300%;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
-  animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* Bubble particles */
+/* Base styles for bubble particles */
 .bubble-particle {
   position: absolute;
+  bottom: 0;
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(var(--bubble-color), 0.8),
-    rgba(var(--bubble-color), 0.2)
+    rgba(var(--bubble-color), 0.7),
+    rgba(var(--bubble-color), 0.1)
   );
   border-radius: 50%;
-  animation: bubble 8s infinite;
+  will-change: transform, opacity;
 }
 
-/* Message floating animation */
+/* Class to apply the floating animation to messages */
 .message-float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 5s ease-in-out infinite;
 }
 
-/* Underwater light rays */
+/* Underwater light ray effect */
 .light-ray {
   position: absolute;
+  top: 0;
+  height: 120%; /* Extend beyond the view for better effect */
+  width: 80px;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 100%
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 80%
   );
-  opacity: 0.3;
-  animation: sway 8s ease-in-out infinite;
+  animation: sway 12s ease-in-out infinite;
 }
 
-@keyframes sway {
-  0%, 100% {
-    transform: translateX(0) rotate(-2deg);
-  }
-  50% {
-    transform: translateX(20px) rotate(2deg);
-  }
-}
-
-/* Custom scrollbar for water theme */
+/* Custom scrollbar for the chat area */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(var(--water-primary), 0.1);
+  background: rgba(var(--water-secondary), 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(var(--water-primary), 0.5);
-  border-radius: 4px;
+  background: rgba(var(--water-primary), 0.6);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--water-primary), 0.7);
+  background: rgba(var(--water-primary), 0.8);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .bubble-particle {
-    animation-duration: 6s;
+  .light-ray {
+    width: 40px;
   }
 }

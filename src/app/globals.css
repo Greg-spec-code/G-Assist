@@ -1,31 +1,89 @@
 /* FILE: src/app/globals.css */
 
-/* This is the modern v4+ way to import Tailwind's styles */
+/* Tailwind CSS imports */
 @import "tailwindcss";
 
-/* The rest of your file is correct and can remain */
+/* Water animations */
+@keyframes wave {
+  0% {
+    d: path("M0,10 Q250,20 500,10 T1000,10 L1000,100 L0,100 Z");
+  }
+  50% {
+    d: path("M0,15 Q250,5 500,15 T1000,15 L1000,100 L0,100 Z");
+  }
+  100% {
+    d: path("M0,10 Q250,20 500,10 T1000,10 L1000,100 L0,100 Z");
+  }
+}
+
+@keyframes waterFill {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bubble {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-50vh) translateX(10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) translateX(-10px);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pour {
+  0% {
+    height: 0;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    height: 100%;
+    opacity: 0;
+  }
+}
+
+/* Base styles */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --water-primary: 34, 211, 238;
+    --water-secondary: 59, 130, 246;
+    --water-accent: 147, 197, 253;
+    --bubble-color: 255, 255, 255;
   }
 }
 
@@ -33,19 +91,108 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
-@keyframes wave {
+
+/* Water effect classes */
+.water-gradient {
+  background: linear-gradient(
+    180deg,
+    rgba(var(--water-accent), 0.3) 0%,
+    rgba(var(--water-primary), 0.6) 50%,
+    rgba(var(--water-secondary), 0.9) 100%
+  );
+}
+
+.water-surface {
+  position: relative;
+  overflow: hidden;
+}
+
+.water-surface::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -100%;
+  width: 300%;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
   0% {
-    d: path("M0,50 C150,100 350,0 500,50 L500,150 L0,150 Z");
-  }
-  50% {
-    d: path("M0,60 C150,0 350,120 500,60 L500,150 L0,150 Z");
+    transform: translateX(-100%);
   }
   100% {
-    d: path("M0,50 C150,100 350,0 500,50 L500,150 L0,150 Z");
+    transform: translateX(100%);
   }
 }
 
-.wave {
-  animation: wave 3s linear infinite;
+/* Bubble particles */
+.bubble-particle {
+  position: absolute;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(var(--bubble-color), 0.8),
+    rgba(var(--bubble-color), 0.2)
+  );
+  border-radius: 50%;
+  animation: bubble 8s infinite;
+}
+
+/* Message floating animation */
+.message-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Underwater light rays */
+.light-ray {
+  position: absolute;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 100%
+  );
+  opacity: 0.3;
+  animation: sway 8s ease-in-out infinite;
+}
+
+@keyframes sway {
+  0%, 100% {
+    transform: translateX(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateX(20px) rotate(2deg);
+  }
+}
+
+/* Custom scrollbar for water theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(var(--water-primary), 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--water-primary), 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--water-primary), 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bubble-particle {
+    animation-duration: 6s;
+  }
 }

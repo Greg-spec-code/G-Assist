@@ -34,3 +34,18 @@ html, body {
   margin: 0;
   padding: 0;
 }
+@keyframes wave {
+  0% {
+    d: path("M0,50 C150,100 350,0 500,50 L500,150 L0,150 Z");
+  }
+  50% {
+    d: path("M0,60 C150,0 350,120 500,60 L500,150 L0,150 Z");
+  }
+  100% {
+    d: path("M0,50 C150,100 350,0 500,50 L500,150 L0,150 Z");
+  }
+}
+
+.wave {
+  animation: wave 3s linear infinite;
+}

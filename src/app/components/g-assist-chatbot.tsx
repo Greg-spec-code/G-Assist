@@ -1,154 +1,143 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
-import { Send, Mic, Paperclip, Sparkles, Zap, Star, MessageCircle, Brain, Wand2 } from "lucide-react";
+import { Send, Mic, Paperclip, Droplets, Volume2, VolumeX, Waves } from "lucide-react";
 
-// FIXED FloatingParticles hydration issue!
-const NUM_PARTICLES = 15;
-function generateParticles() {
-  return Array.from({ length: NUM_PARTICLES }, () => ({
-    top: Math.random() * 100,
-    left: Math.random() * 100,
-    width: Math.random() * 20 + 5,
-    height: Math.random() * 20 + 5,
-    x: Math.random() * 30 - 15,
-    duration: Math.random() * 5 + 5,
-  }));
-}
-const FloatingParticles = () => {
-  const [particles, setParticles] = useState<Array<any>>([]);
-  useEffect(() => {
-    setParticles(generateParticles());
-  }, []);
+// Water bubble component
+const WaterBubble = ({ delay = 0, size = "small", position }) => {
+  const sizes = {
+    small: "w-2 h-2",
+    medium: "w-3 h-3",
+    large: "w-4 h-4"
+  };
+  
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-gradient-to-r from-blue-400/20 to-green-400/20"
-          style={{
-            top: `${p.top}%`,
-            left: `${p.left}%`,
-            width: `${p.width}px`,
-            height: `${p.height}px`,
-          }}
-          animate={{
-            y: [0, -20, 0],
-            x: [0, p.x, 0],
-            opacity: [0.3, 0.7, 0.3],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
+    <motion.div
+      className={`absolute ${sizes[size]} rounded-full bg-white/20 backdrop-blur-sm`}
+      style={{ left: `${position}%` }}
+      initial={{ bottom: -20, opacity: 0 }}
+      animate={{
+        bottom: ["0%", "100%"],
+        opacity: [0, 0.6, 0.8, 0],
+        x: [0, Math.random() * 20 - 10, Math.random() * 20 - 10, 0],
+      }}
+      transition={{
+        duration: Math.random() * 5 + 5,
+        repeat: Infinity,
+        delay,
+        ease: "easeOut"
+      }}
+    />
+  );
+};
+
+// Water pour animation
+const WaterPour = () => {
+  return (
+    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-32 overflow-hidden pointer-events-none z-50">
+      <motion.div
+        className="w-full h-full bg-gradient-to-b from-cyan-300/80 via-cyan-400/60 to-transparent"
+        animate={{
+          y: ["-100%", "100%"],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        style={{
+          clipPath: "polygon(35% 0%, 65% 0%, 55% 100%, 45% 100%)",
+        }}
+      />
+      <motion.div
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-6"
+        animate={{
+          opacity: [0, 1, 0],
+        }}
+        transition={{
+          duration: 0.5,
+          repeat: Infinity,
+        }}
+      >
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-cyan-300 rounded-full"
+            style={{ left: `${i * 20}px` }}
+            animate={{
+              y: [0, 150],
+              opacity: [1, 0],
+            }}
+            transition={{
+              duration: 1,
+              repeat: Infinity,
+              delay: i * 0.2,
+            }}
+          />
+        ))}
+      </motion.div>
     </div>
   );
 };
 
-
-// ==================================================================
-// STEP 1: ADD THE NEW WATERWAVE COMPONENT CODE HERE
-// ==================================================================
-const WaterWave = () => {
+// Ripple effect component
+const Ripple = ({ x, y }) => {
   return (
     <motion.div
-      className="absolute bottom-0 left-0 w-full z-0 h-full"
-      initial={{ y: "100%" }} // Start below the screen
-      animate={{ y: "25%" }} // Animate to fill 75% of the container
-      transition={{ duration: 4, ease: "easeOut", delay: 0.5 }}
+      className="absolute pointer-events-none"
+      style={{ left: x, top: y }}
+      initial={{ scale: 0, opacity: 1 }}
+      animate={{ scale: 4, opacity: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
-      <svg
-        viewBox="0 0 500 150"
-        preserveAspectRatio="none"
-        style={{ width: '100%', height: '100%' }}
-        className="fill-current text-cyan-500/80"
-      >
-        <path
-          className="wave"
-          d="M0,50 C150,100 350,0 500,50 L500,150 L0,150 Z"
-        />
-      </svg>
+      <div className="w-10 h-10 rounded-full border-2 border-cyan-300/50" />
     </motion.div>
   );
 };
 
-
 const GAssistChatbot = () => {
-  const [placeholderText, setPlaceholderText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [loopNum, setLoopNum] = useState(0);
-  const [typingSpeed, setTypingSpeed] = useState(150);
   const [userInput, setUserInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Array<{id: string, role: string, content: string, timestamp: Date}>>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState([]);
+  const [waterLevel, setWaterLevel] = useState(0);
+  const [ripples, setRipples] = useState([]);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const messagesEndRef = useRef(null);
+  const chatAreaRef = useRef(null);
 
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Typewriter effect for placeholder
+  // Animate water filling on mount
   useEffect(() => {
-    const prompts = [
-      "Ask me anything about technology...",
-      "Get help with coding and development...",
-      "Explore creative ideas and solutions...",
-      "Learn something new today...",
-      "Solve complex problems together..."
-    ];
-    const handleTyping = () => {
-      const i = loopNum % prompts.length;
-      const fullText = prompts[i];
-
-      if (isDeleting) {
-        setPlaceholderText(fullText.substring(0, placeholderText.length - 1));
-        setTypingSpeed(30);
-      } else {
-        setPlaceholderText(fullText.substring(0, placeholderText.length + 1));
-        setTypingSpeed(150);
-      }
-
-      if (!isDeleting && placeholderText === fullText) {
-        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = setTimeout(() => setIsDeleting(true), 1000);
-      } else if (isDeleting && placeholderText === "") {
-        setIsDeleting(false);
-        setLoopNum(loopNum + 1);
-      }
-    };
-
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(handleTyping, typingSpeed);
-
-    return () => {
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    };
-  }, [placeholderText, isDeleting, loopNum, typingSpeed]);
+    const timer = setTimeout(() => {
+      setWaterLevel(100);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Simulate AI typing
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => {
-        setIsTyping(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    } else {
-      setIsTyping(false);
-    }
-  }, [isLoading]);
+  // Create ripple effect
+  const createRipple = (e) => {
+    if (!chatAreaRef.current) return;
+    const rect = chatAreaRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const newRipple = { id: Date.now(), x, y };
+    setRipples(prev => [...prev, newRipple]);
+    setTimeout(() => {
+      setRipples(prev => prev.filter(r => r.id !== newRipple.id));
+    }, 1000);
+  };
 
-  const handleSubmit = async (e: React.FormEvent | React.MouseEvent | React.KeyboardEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
     if (!userInput.trim()) return;
+
+    // Create splash effect
+    createRipple({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 });
 
     const newUserMessage = {
       id: Date.now().toString(),
@@ -171,9 +160,9 @@ const GAssistChatbot = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-         "model": "google/gemini-2.0-flash-exp:free",
+          "model": "google/gemini-2.0-flash-exp:free",
           "messages": [
-            ...messages.filter(m => m.role !== 'system').map(m => ({
+            ...messages.map(m => ({
               role: m.role,
               content: m.content
             })),
@@ -187,16 +176,14 @@ const GAssistChatbot = () => {
 
       if (!response.ok) {
         const errorData = await response.text();
-        console.error(`API Error ${response.status}:`, errorData);
-        throw new Error(`API request failed with status ${response.status}: ${errorData}`);
+        throw new Error(`API request failed: ${errorData}`);
       }
 
       const data = await response.json();
-
       const aiResponse = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response. Please try again.",
+        content: data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response.",
         timestamp: new Date()
       };
 
@@ -206,7 +193,7 @@ const GAssistChatbot = () => {
       const errorMessage = {
         id: (Date.now() + 2).toString(),
         role: "assistant",
-        content: "Sorry, I encountered an error. Please make sure your API key is configured correctly and try again.",
+        content: "Sorry, I encountered an error. Please check your API key and try again.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -214,310 +201,257 @@ const GAssistChatbot = () => {
       setIsLoading(false);
     }
   };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-2 md:p-4 relative overflow-hidden">
-      <FloatingParticles />
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-cyan-50 to-blue-100">
+      {/* Water background layer */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Water fill animation */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-blue-500 via-cyan-400 to-cyan-300/90"
+          initial={{ height: "0%" }}
+          animate={{ height: `${waterLevel}%` }}
+          transition={{ duration: 3, ease: "easeInOut" }}
+        >
+          {/* Water surface waves */}
+          <svg className="absolute top-0 left-0 w-full h-20" preserveAspectRatio="none">
+            <motion.path
+              d="M0,10 Q250,20 500,10 T1000,10 L1000,100 L0,100 Z"
+              fill="url(#waterGradient)"
+              animate={{
+                d: [
+                  "M0,10 Q250,20 500,10 T1000,10 L1000,100 L0,100 Z",
+                  "M0,15 Q250,5 500,15 T1000,15 L1000,100 L0,100 Z",
+                  "M0,10 Q250,20 500,10 T1000,10 L1000,100 L0,100 Z"
+                ]
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            <defs>
+              <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="rgba(34, 211, 238, 0.8)" />
+                <stop offset="100%" stopColor="rgba(59, 130, 246, 0.9)" />
+              </linearGradient>
+            </defs>
+          </svg>
 
-      <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-blue-500/10 blur-3xl"></div>
-      <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full bg-green-500/10 blur-3xl"></div>
-      <div className="absolute top-1/3 right-1/4 w-24 h-24 rounded-full bg-teal-500/10 blur-3xl"></div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-4xl bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/20 relative z-10"
-      >
-        {/* ================================================================== */}
-        {/* STEP 2: ADD THE WATER WAVE COMPONENT INTO THE LAYOUT */}
-        {/* ================================================================== */}
-        <WaterWave />
-
-        {/* Make a new relative container for all other content to sit ON TOP of the wave */}
-        <div className="relative z-10">
-          {/* Header Section */}
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/80 via-teal-600/80 to-green-600/80 opacity-0"></div>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-400/30 to-green-500/30 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-cyan-400/30 to-blue-500/30 rounded-full translate-y-24 -translate-x-24 blur-3xl"></div>
-
-            <div className="relative p-4 text-center z-10">
+          {/* Underwater light rays */}
+          <div className="absolute inset-0 opacity-30">
+            {[...Array(5)].map((_, i) => (
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="flex justify-center mb-2"
+                key={i}
+                className="absolute top-0 h-full w-16 bg-gradient-to-b from-white/20 to-transparent"
+                style={{ left: `${i * 25}%` }}
+                animate={{
+                  opacity: [0.2, 0.5, 0.2],
+                  x: [-20, 20, -20],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  delay: i * 1.5,
+                }}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Bubbles */}
+        {[...Array(15)].map((_, i) => (
+          <WaterBubble
+            key={i}
+            delay={i * 0.5}
+            size={["small", "medium", "large"][i % 3]}
+            position={Math.random() * 100}
+          />
+        ))}
+      </div>
+
+      {/* Water pour effect */}
+      {waterLevel < 100 && <WaterPour />}
+
+      {/* Main content */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/20 backdrop-blur-xl border-b border-white/30 p-4"
+        >
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center"
               >
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-500 rounded-full blur-lg opacity-70"></div>
-                  <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-green-500 flex items-center justify-center">
-                    <Sparkles className="h-6 w-6 text-white" />
+                <Droplets className="h-6 w-6 text-white" />
+              </motion.div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Aqua G-Assist</h1>
+                <p className="text-cyan-100 text-sm">Powered by Google Gemini 2.0</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="rounded-full bg-white/20 backdrop-blur-lg hover:bg-white/30 border border-white/30 p-2 transition-all"
+            >
+              {soundEnabled ? <Volume2 className="h-5 w-5 text-white" /> : <VolumeX className="h-5 w-5 text-white" />}
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Chat area */}
+        <div 
+          ref={chatAreaRef}
+          className="flex-1 max-w-4xl mx-auto w-full p-4 overflow-y-auto"
+          onClick={createRipple}
+        >
+          {/* Ripple effects */}
+          <AnimatePresence>
+            {ripples.map((ripple) => (
+              <Ripple key={ripple.id} x={ripple.x} y={ripple.y} />
+            ))}
+          </AnimatePresence>
+
+          {/* Messages */}
+          <div className="space-y-4 pb-20">
+            {messages.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-20"
+              >
+                <Waves className="h-16 w-16 text-cyan-300 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Welcome to Aqua G-Assist</h2>
+                <p className="text-cyan-100">Start a conversation and watch the water ripple with intelligence</p>
+              </motion.div>
+            ) : (
+              <AnimatePresence>
+                {messages.map((msg, index) => (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: [20, -5, 0],
+                      scale: 1,
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 20,
+                    }}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <motion.div
+                      animate={{
+                        y: [0, -3, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: index * 0.2,
+                        ease: "easeInOut"
+                      }}
+                      className={`max-w-[80%] rounded-2xl p-4 backdrop-blur-lg ${
+                        msg.role === 'user'
+                          ? 'bg-gradient-to-r from-blue-400/80 to-cyan-400/80 text-white'
+                          : 'bg-white/30 text-white border border-white/40'
+                      }`}
+                      style={{
+                        boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
+                      }}
+                    >
+                      <p className="font-medium mb-1 text-sm opacity-90">
+                        {msg.role === 'user' ? 'You' : 'Aqua Assistant'}
+                      </p>
+                      <p>{msg.content}</p>
+                    </motion.div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
+            
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex justify-start"
+              >
+                <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-4 border border-white/40">
+                  <div className="flex items-center gap-2">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Droplets className="h-5 w-5 text-cyan-300" />
+                    </motion.div>
+                    <span className="text-cyan-100">Thinking...</span>
                   </div>
                 </div>
               </motion.div>
-
-              <motion.h1
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-3xl md:text-4xl font-bold text-white mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-white to-green-300"
-              >
-                G-Assist
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-base text-blue-100 max-w-2xl mx-auto font-light"
-              >
-                Powered by Google Gemini 2.0 Flash - Your intelligent AI assistant
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="flex justify-center gap-1 mt-2"
-              >
-                {[...Array(5)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      delay: i * 0.2,
-                      repeatDelay: 3
-                    }}
-                  >
-                    <Star className="h-4 w-4 text-yellow-300" fill="currentColor" />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Chat Messages Section */}
-          <div className="h-80 overflow-y-auto p-3 bg-gradient-to-b from-black/5 to-transparent relative">
-            {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-2">
-                <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring" }}
-                className="mb-4 p-3 rounded-full bg-gradient-to-r from-blue-500/20 to-green-500/20"
-                >
-                <Wand2 className="h-8 w-8 text-blue-300" />
-                </motion.div>
-                <motion.h3
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-xl font-bold text-white mb-1"
-                >
-                Welcome to G-Assist
-                </motion.h3>
-                <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-sm text-blue-200 max-w-md"
-                >
-                Start a conversation with Google Gemini AI. I can help you with coding, answer questions, and assist with creative tasks.
-                </motion.p>
-                <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-6 w-full max-w-md"
-                >
-                {[
-                    "Explain quantum computing",
-                    "Write Python code",
-                    "Creative story ideas",
-                    "Solve math problems"
-                ].map((suggestion, i) => (
-                    <motion.div
-                    key={i}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center text-xs text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                    onClick={() => setUserInput(suggestion)}
-                    >
-                    {suggestion}
-                    </motion.div>
-                ))}
-                </motion.div>
-            </div>
-            ) : (
-            <div className="space-y-4">
-                <AnimatePresence>
-                {messages.map((msg) => (
-                    <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                    <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-2 relative overflow-hidden text-sm ${
-                        msg.role === 'user'
-                            ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-br-none'
-                            : 'bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-bl-none'
-                        }`}
-                    >
-                        {msg.role === 'assistant' && (
-                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-cyan-500/10 to-green-500/10"></div>
-                        )}
-                        <div className="relative z-10">
-                        <div className="flex items-start gap-2">
-                            {msg.role === 'assistant' ? (
-                            <div className="mt-1 p-1 rounded-md bg-gradient-to-r from-cyan-500/30 to-green-500/30">
-                                <Brain className="h-4 w-4 text-cyan-300" />
-                            </div>
-                            ) : (
-                            <div className="mt-1 p-1 rounded-md bg-gradient-to-r from-blue-500/30 to-teal-500/30">
-                                <MessageCircle className="h-4 w-4 text-blue-300" />
-                            </div>
-                            )}
-                            <div>
-                            <p className="font-medium mb-0.5">
-                                {msg.role === 'user' ? 'You' : 'G-Assist'}
-                            </p>
-                            <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                    </motion.div>
-                ))}
-                </AnimatePresence>
-                {isTyping && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex justify-start"
-                >
-                    <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl rounded-bl-none px-4 py-2">
-                    <div className="flex items-center gap-2">
-                        <div className="flex space-x-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-100"></div>
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-200"></div>
-                        </div>
-                        <span className="text-cyan-300 text-xs">G-Assist is thinking...</span>
-                    </div>
-                    </div>
-                </motion.div>
-                )}
-                <div ref={messagesEndRef} />
-            </div>
             )}
+            
+            <div ref={messagesEndRef} />
           </div>
+        </div>
 
-          {/* Chat Input Section */}
-          <div className="p-3 bg-black/10 border-t border-white/10">
-            <div className="relative">
-              <Textarea
+        {/* Input area */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-cyan-400/50 to-transparent backdrop-blur-xl border-t border-white/30 p-4"
+        >
+          <div className="max-w-4xl mx-auto">
+            <div className="flex gap-2">
+              <textarea
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                placeholder={placeholderText}
+                placeholder="Dive into conversation..."
+                className="flex-1 min-h-[50px] max-h-[100px] rounded-xl bg-white/20 backdrop-blur-lg text-white placeholder:text-white/60 border border-white/30 resize-none p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
                   }
                 }}
-                className="min-h-[60px] w-full rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg p-3 pr-14 text-base text-white placeholder:text-white/60 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 focus:ring-opacity-50 resize-none"
-                disabled={isLoading}
               />
-              <Button
+              <button
                 onClick={handleSubmit}
-                size="icon"
-                className="absolute bottom-2.5 right-2.5 h-10 w-10 rounded-lg bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 shadow-lg shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 disabled={isLoading || !userInput.trim()}
+                className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <Send className="h-4 w-4 text-white" />
-              </Button>
+                <Send className="h-5 w-5" />
+              </button>
             </div>
-            <div className="flex justify-center gap-2 mt-2">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-10 w-10 rounded-full border border-white/30 bg-white/10 backdrop-blur-lg hover:bg-white/20 disabled:opacity-50"
-                  disabled={isLoading}
-                >
-                  <Mic className="h-4 w-4 text-cyan-300" />
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-10 w-10 rounded-full border border-white/30 bg-white/10 backdrop-blur-lg hover:bg-white/20 disabled:opacity-50"
-                  disabled={isLoading}
-                >
-                  <Paperclip className="h-4 w-4 text-cyan-300" />
-                </Button>
-              </motion.div>
+            
+            <div className="flex justify-center gap-2 mt-3">
+              <button
+                className="rounded-full bg-white/10 backdrop-blur-lg hover:bg-white/20 p-2 transition-all"
+              >
+                <Mic className="h-5 w-5 text-white" />
+              </button>
+              <button
+                className="rounded-full bg-white/10 backdrop-blur-lg hover:bg-white/20 p-2 transition-all"
+              >
+                <Paperclip className="h-5 w-5 text-white" />
+              </button>
             </div>
           </div>
+        </motion.div>
+      </div>
 
-          {/* Features Section */}
-          <div className="p-3 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              {[
-                {
-                  icon: <Zap className="h-5 w-5 text-yellow-400" />,
-                  title: "Google Gemini",
-                  desc: "Powered by cutting-edge AI"
-                },
-                {
-                  icon: <Sparkles className="h-5 w-5 text-cyan-400" />,
-                  title: "Free to Use",
-                  desc: "No API key required"
-                },
-                {
-                  icon: <Star className="h-5 w-5 text-green-400" fill="currentColor" />,
-                  title: "Lightning Fast",
-                  desc: "Instant AI responses"
-                }
-              ].map((feature, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ y: -5 }}
-                  className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:border-white/20 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className="p-1.5 rounded-md bg-white/10">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-base font-semibold text-white">{feature.title}</h3>
-                  </div>
-                  <p className="text-sm text-blue-200">{feature.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-        </div> {/* This is the closing tag for the 'relative z-10' wrapper */}
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="mt-4 text-center text-white/60 text-xs"
-      >
-        <p>Powered by Google Gemini 2.0 Flash • Your intelligent AI assistant</p>
-      </motion.div>
+      {/* Underwater ambient sound (optional implementation) */}
+      {soundEnabled && (
+        <audio autoPlay loop>
+          <source src="/underwater-ambience.mp3" type="audio/mpeg" />
+        </audio>
+      )}
     </div>
   );
 };

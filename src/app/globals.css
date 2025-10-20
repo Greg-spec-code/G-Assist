@@ -1,93 +1,31 @@
 /* FILE: src/app/globals.css */
+/* --- PASTE THIS ENTIRE CODE BLOCK --- */
 
-/* Tailwind CSS imports */
+/* This is the modern v4+ way to import Tailwind's styles */
 @import "tailwindcss";
 
-/* --- KEYFRAME ANIMATIONS --- */
-
-/* For the water surface waves */
-@keyframes wave {
-  0% {
-    d: path("M0,10 Q250,20 500,10 T1000,10");
-  }
-  50% {
-    d: path("M0,15 Q250,5 500,15 T1000,15");
-  }
-  100% {
-    d: path("M0,10 Q250,20 500,10 T1000,10");
-  }
-}
-
-/* For the initial screen fill */
-@keyframes waterFill {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-/* For the rising bubbles */
-@keyframes bubble {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.8;
-  }
-  90% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-100vh) translateX(var(--bubble-x-end, 0));
-  }
-}
-
-/* For the input ripple effect */
-@keyframes ripple {
-  from {
-    transform: scale(0);
-    opacity: 1;
-  }
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* For the gentle bobbing of messages */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-/* For the subtle swaying of light rays */
-@keyframes sway {
-  0%, 100% {
-    transform: translateX(-10px) rotate(-5deg);
-    opacity: 0.2;
-  }
-  50% {
-    transform: translateX(10px) rotate(5deg);
-    opacity: 0.4;
-  }
-}
-
-
-/* --- BASE STYLES & COLOR VARIABLES --- */
 @layer base {
   :root {
-    --water-primary: 34, 211, 238;   /* cyan-400 */
-    --water-secondary: 59, 130, 246; /* blue-500 */
-    --water-accent: 147, 197, 253;  /* blue-300 */
-    --bubble-color: 255, 255, 255;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
   }
 }
 
@@ -95,74 +33,11 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent scrollbars from the main page */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- THEME-SPECIFIC UTILITY CLASSES --- */
-
-/* Gradient for the main water body */
-.water-gradient {
-  background: linear-gradient(
-    180deg,
-    rgba(var(--water-accent), 0.5) 0%,
-    rgba(var(--water-primary), 0.7) 40%,
-    rgba(var(--water-secondary), 0.9) 100%
-  );
-}
-
-/* Base styles for bubble particles */
-.bubble-particle {
-  position: absolute;
-  bottom: 0;
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(var(--bubble-color), 0.7),
-    rgba(var(--bubble-color), 0.1)
-  );
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-/* Class to apply the floating animation to messages */
-.message-float {
-  animation: float 5s ease-in-out infinite;
-}
-
-/* Underwater light ray effect */
-.light-ray {
-  position: absolute;
-  top: 0;
-  height: 120%; /* Extend beyond the view for better effect */
-  width: 80px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 80%
-  );
-  animation: sway 12s ease-in-out infinite;
-}
-
-/* Custom scrollbar for the chat area */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(var(--water-secondary), 0.2);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(var(--water-primary), 0.6);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--water-primary), 0.8);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .light-ray {
-    width: 40px;
-  }
+/* Hide scrollbar for webkit browsers */
+.overflow-y-auto::-webkit-scrollbar {
+  display: none;
 }

@@ -51,7 +51,6 @@ const FloatingParticles = () => {
 };
 
 const GAssistChatbot = () => {
-  // NOTE: No changes were made to the state management or useEffect hooks.
   const [placeholderText, setPlaceholderText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [loopNum, setLoopNum] = useState(0);
@@ -186,7 +185,6 @@ const GAssistChatbot = () => {
   };
 
   return (
-    // CHANGE: Main container now forces a full-screen layout to prevent overflow.
     <div className="h-screen w-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
       <FloatingParticles />
       
@@ -194,14 +192,12 @@ const GAssistChatbot = () => {
       <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full bg-green-500/10 blur-3xl"></div>
       <div className="absolute top-1/3 right-1/4 w-24 h-24 rounded-full bg-teal-500/10 blur-3xl"></div>
       
-      {/* CHANGE: Added flex, flex-col, and h-full to make the chat window adapt to screen height. */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full h-full md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem] bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/20 z-10 flex flex-col"
       >
-        {/* Header Section (No major changes here) */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/80 via-teal-600/80 to-green-600/80"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-400/30 to-green-500/30 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
@@ -234,7 +230,6 @@ const GAssistChatbot = () => {
           </div>
         </div>
 
-        {/* CHANGE: Chat messages area now grows to fill available space. */}
         <div className="flex-grow overflow-y-auto p-4 bg-gradient-to-b from-black/5 to-transparent">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-4">
@@ -263,7 +258,7 @@ const GAssistChatbot = () => {
                     {suggestion}
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -322,10 +317,7 @@ const GAssistChatbot = () => {
           )}
         </div>
 
-        {/* CHANGE: Chat Input Section now contains the Features section. */}
         <div className="p-3 bg-black/10 border-t border-white/10">
-
-          {/* CHANGE: This is the new, minimized, and relocated features section. */}
           <div className="grid grid-cols-3 gap-2 mb-3">
             {[
               { icon: <Zap className="h-4 w-4 text-yellow-400" />, title: "Google Gemini" },

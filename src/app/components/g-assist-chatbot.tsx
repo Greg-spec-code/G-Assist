@@ -176,7 +176,7 @@ const GAssistChatbot = () => {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response. Please try again.",
-        timestamp: new Date()
+        timestamp: new new Date()
       };
   
       setMessages(prev => [...prev, aiResponse]);
@@ -194,7 +194,7 @@ const GAssistChatbot = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
       <FloatingParticles />
       
       {/* Decorative elements */}
@@ -206,7 +206,9 @@ const GAssistChatbot = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-4xl bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative z-10"
+        // MODIFIED: Added responsive max-width classes.
+        // It's full-width by default (for mobile), then constrained on larger screens.
+        className="w-full md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem] bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative z-10"
       >
         {/* Header Section with gradient and decorative elements */}
         <div className="relative overflow-hidden">
@@ -214,7 +216,8 @@ const GAssistChatbot = () => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-400/30 to-green-500/30 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-cyan-400/30 to-blue-500/30 rounded-full translate-y-24 -translate-x-24 blur-3xl"></div>
           
-          <div className="relative p-8 text-center z-10">
+          {/* MODIFIED: Reduced padding on mobile (p-4) and increased it for larger screens (sm:p-8) */}
+          <div className="relative p-4 sm:p-8 text-center z-10">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -233,7 +236,8 @@ const GAssistChatbot = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-4xl md:text-5xl font-bold text-white mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-white to-green-300"
+              // MODIFIED: Adjusted heading font size to be smaller on mobile.
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-white to-green-300"
             >
               G-Assist
             </motion.h1>
@@ -242,7 +246,8 @@ const GAssistChatbot = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-xl text-blue-100 max-w-2xl mx-auto font-light"
+              // MODIFIED: Adjusted paragraph font size for mobile.
+              className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto font-light"
             >
               Powered by Google Gemini 2.0 Flash - Your intelligent AI assistant
             </motion.p>
@@ -275,7 +280,9 @@ const GAssistChatbot = () => {
         </div>
 
         {/* Chat Messages with beautiful styling */}
-        <div className="h-96 overflow-y-auto p-6 bg-gradient-to-b from-black/5 to-transparent relative">
+        {/* MODIFIED: Changed fixed height (h-96) to a responsive, viewport-based height (h-[60vh]) */}
+        {/* and adjusted padding for mobile. */}
+        <div className="h-[60vh] overflow-y-auto p-4 sm:p-6 bg-gradient-to-b from-black/5 to-transparent relative">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-4">
               <motion.div
@@ -309,6 +316,7 @@ const GAssistChatbot = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
+                // MODIFIED: Adjusted grid columns for better spacing on very small screens if needed, though grid-cols-2 is a good start.
                 className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 w-full max-w-md"
               >
                 {[
@@ -321,7 +329,8 @@ const GAssistChatbot = () => {
                     key={i}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center text-sm text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
+                    // MODIFIED: Adjusted padding and text size for better fit on small screens.
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-xs sm:p-3 sm:text-sm text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
                     onClick={() => setUserInput(suggestion)}
                   >
                     {suggestion}
@@ -330,7 +339,8 @@ const GAssistChatbot = () => {
               </motion.div>
             </div>
           ) : (
-            <div className="space-y-6">
+            // MODIFIED: Adjusted spacing between messages for mobile.
+            <div className="space-y-4">
               <AnimatePresence>
                 {messages.map((msg) => (
                   <motion.div 
@@ -342,7 +352,7 @@ const GAssistChatbot = () => {
                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div 
-                      className={`max-w-[85%] rounded-3xl px-5 py-4 relative overflow-hidden ${
+                      className={`max-w-[85%] rounded-3xl px-4 py-3 sm:px-5 sm:py-4 relative overflow-hidden ${
                         msg.role === 'user' 
                           ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-br-none' 
                           : 'bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-bl-none'
@@ -400,7 +410,8 @@ const GAssistChatbot = () => {
         </div>
 
         {/* Chat Input Section with enhanced design */}
-        <div className="p-6 bg-black/10 border-t border-white/10">
+        {/* MODIFIED: Reduced padding for mobile (p-4) */}
+        <div className="p-4 sm:p-6 bg-black/10 border-t border-white/10">
           <div className="relative">
             <Textarea
               value={userInput}
@@ -412,14 +423,16 @@ const GAssistChatbot = () => {
                   handleSubmit(e);
                 }
               }}
-              className="min-h-[120px] w-full rounded-2xl border border-white/20 bg-white/10 backdrop-blur-lg p-4 pr-16 text-lg text-white placeholder:text-white/60 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 focus:ring-opacity-50 resize-none"
+              // MODIFIED: Adjusted min-height, padding, and text size for mobile.
+              className="min-h-[80px] md:min-h-[120px] w-full rounded-2xl border border-white/20 bg-white/10 backdrop-blur-lg p-3 pr-14 sm:p-4 sm:pr-16 text-base sm:text-lg text-white placeholder:text-white/60 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 focus:ring-opacity-50 resize-none"
               disabled={isLoading}
             />
             
             <Button 
               onClick={handleSubmit}
               size="icon" 
-              className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 shadow-lg shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              // MODIFIED: Adjusted button size and position for mobile. A 44px (h-11) or 48px (h-12) touch target is ideal.
+              className="absolute bottom-3 right-3 h-11 w-11 sm:bottom-4 sm:right-4 sm:h-12 sm:w-12 rounded-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 shadow-lg shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
               disabled={isLoading || !userInput.trim()}
             >
               <Send className="h-5 w-5 text-white" />
@@ -427,6 +440,7 @@ const GAssistChatbot = () => {
           </div>
 
           {/* Action Buttons with beautiful styling */}
+          {/* MODIFIED: Touch targets are h-12 w-12 which is great for mobile. Kept as is. */}
           <div className="flex justify-center gap-4 mt-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
@@ -453,7 +467,8 @@ const GAssistChatbot = () => {
         </div>
 
         {/* Features Section with beautiful cards */}
-        <div className="p-6 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
+        {/* MODIFIED: Reduced padding for mobile. The grid layout is already responsive (grid-cols-1 md:grid-cols-3) */}
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { 

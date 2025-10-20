@@ -57,7 +57,7 @@ const GAssistChatbot = () => {
   const [typingSpeed, setTypingSpeed] = useState(150);
   const [userInput, setUserInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Array<{id: string, role: string, content: string, timestamp: Date}>>([]); 
+  const [messages, setMessages] = useState<Array<{id: string, role: string, content: string, timestamp: Date}>>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -121,7 +121,7 @@ const GAssistChatbot = () => {
   const handleSubmit = async (e: React.FormEvent | React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     if (!userInput.trim()) return;
-  
+
     // Add user message to chat
     const newUserMessage = {
       id: Date.now().toString(),
@@ -129,11 +129,11 @@ const GAssistChatbot = () => {
       content: userInput,
       timestamp: new Date()
     };
-  
+
     setMessages(prev => [...prev, newUserMessage]);
     setUserInput("");
     setIsLoading(true);
-  
+
     try {
       // Call OpenRouter API with Google Gemini model
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -159,26 +159,28 @@ const GAssistChatbot = () => {
           ]
         })
       });
-  
+
       if (!response.ok) {
         // Get more specific error information
         const errorData = await response.text();
         console.error(`API Error ${response.status}:`, errorData);
         throw new Error(`API request failed with status ${response.status}: ${errorData}`);
       }
-  
+
       // *** THIS IS THE FIX ***
       // You must parse the JSON from the response body AFTER you know the request was successful.
       const data = await response.json();
-  
+
       // Add AI response
       const aiResponse = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response. Please try again.",
-        timestamp: new new Date()
+        // *** THIS IS THE FIX ***
+        // The extra 'new' keyword has been removed.
+        timestamp: new Date()
       };
-  
+
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
       console.error("Error:", error);
@@ -196,18 +198,16 @@ const GAssistChatbot = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-900 to-green-800 flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
       <FloatingParticles />
-      
+
       {/* Decorative elements */}
       <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-blue-500/10 blur-3xl"></div>
       <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full bg-green-500/10 blur-3xl"></div>
       <div className="absolute top-1/3 right-1/4 w-24 h-24 rounded-full bg-teal-500/10 blur-3xl"></div>
-      
-      <motion.div 
+
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        // MODIFIED: Added responsive max-width classes.
-        // It's full-width by default (for mobile), then constrained on larger screens.
         className="w-full md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem] bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative z-10"
       >
         {/* Header Section with gradient and decorative elements */}
@@ -215,8 +215,7 @@ const GAssistChatbot = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/80 via-teal-600/80 to-green-600/80"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-400/30 to-green-500/30 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-cyan-400/30 to-blue-500/30 rounded-full translate-y-24 -translate-x-24 blur-3xl"></div>
-          
-          {/* MODIFIED: Reduced padding on mobile (p-4) and increased it for larger screens (sm:p-8) */}
+
           <div className="relative p-4 sm:p-8 text-center z-10">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -231,27 +230,25 @@ const GAssistChatbot = () => {
                 </div>
               </div>
             </motion.div>
-            
-            <motion.h1 
+
+            <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              // MODIFIED: Adjusted heading font size to be smaller on mobile.
               className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-white to-green-300"
             >
               G-Assist
             </motion.h1>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              // MODIFIED: Adjusted paragraph font size for mobile.
               className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto font-light"
             >
               Powered by Google Gemini 2.0 Flash - Your intelligent AI assistant
             </motion.p>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -261,11 +258,11 @@ const GAssistChatbot = () => {
               {[...Array(5)].map((_, i) => (
                 <motion.div
                   key={i}
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.2, 1],
                     rotate: [0, 10, -10, 0]
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 2,
                     repeat: Infinity,
                     delay: i * 0.2,
@@ -280,8 +277,6 @@ const GAssistChatbot = () => {
         </div>
 
         {/* Chat Messages with beautiful styling */}
-        {/* MODIFIED: Changed fixed height (h-96) to a responsive, viewport-based height (h-[60vh]) */}
-        {/* and adjusted padding for mobile. */}
         <div className="h-[60vh] overflow-y-auto p-4 sm:p-6 bg-gradient-to-b from-black/5 to-transparent relative">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-4">
@@ -293,8 +288,8 @@ const GAssistChatbot = () => {
               >
                 <Wand2 className="h-12 w-12 text-blue-300" />
               </motion.div>
-              
-              <motion.h3 
+
+              <motion.h3
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -302,8 +297,8 @@ const GAssistChatbot = () => {
               >
                 Welcome to G-Assist
               </motion.h3>
-              
-              <motion.p 
+
+              <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
@@ -311,12 +306,11 @@ const GAssistChatbot = () => {
               >
                 Start a conversation with Google Gemini AI. I can help you with coding, answer questions, and assist with creative tasks.
               </motion.p>
-              
+
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                // MODIFIED: Adjusted grid columns for better spacing on very small screens if needed, though grid-cols-2 is a good start.
                 className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 w-full max-w-md"
               >
                 {[
@@ -329,7 +323,6 @@ const GAssistChatbot = () => {
                     key={i}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    // MODIFIED: Adjusted padding and text size for better fit on small screens.
                     className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-xs sm:p-3 sm:text-sm text-white border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
                     onClick={() => setUserInput(suggestion)}
                   >
@@ -339,11 +332,10 @@ const GAssistChatbot = () => {
               </motion.div>
             </div>
           ) : (
-            // MODIFIED: Adjusted spacing between messages for mobile.
             <div className="space-y-4">
               <AnimatePresence>
                 {messages.map((msg) => (
-                  <motion.div 
+                  <motion.div
                     key={msg.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -351,10 +343,10 @@ const GAssistChatbot = () => {
                     transition={{ duration: 0.3 }}
                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div 
+                    <div
                       className={`max-w-[85%] rounded-3xl px-4 py-3 sm:px-5 sm:py-4 relative overflow-hidden ${
-                        msg.role === 'user' 
-                          ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-br-none' 
+                        msg.role === 'user'
+                          ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-br-none'
                           : 'bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-bl-none'
                       }`}
                     >
@@ -384,9 +376,9 @@ const GAssistChatbot = () => {
                   </motion.div>
                 ))}
               </AnimatePresence>
-              
+
               {isTyping && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="flex justify-start"
@@ -403,14 +395,13 @@ const GAssistChatbot = () => {
                   </div>
                 </motion.div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
           )}
         </div>
 
         {/* Chat Input Section with enhanced design */}
-        {/* MODIFIED: Reduced padding for mobile (p-4) */}
         <div className="p-4 sm:p-6 bg-black/10 border-t border-white/10">
           <div className="relative">
             <Textarea
@@ -423,15 +414,13 @@ const GAssistChatbot = () => {
                   handleSubmit(e);
                 }
               }}
-              // MODIFIED: Adjusted min-height, padding, and text size for mobile.
               className="min-h-[80px] md:min-h-[120px] w-full rounded-2xl border border-white/20 bg-white/10 backdrop-blur-lg p-3 pr-14 sm:p-4 sm:pr-16 text-base sm:text-lg text-white placeholder:text-white/60 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 focus:ring-opacity-50 resize-none"
               disabled={isLoading}
             />
-            
-            <Button 
+
+            <Button
               onClick={handleSubmit}
-              size="icon" 
-              // MODIFIED: Adjusted button size and position for mobile. A 44px (h-11) or 48px (h-12) touch target is ideal.
+              size="icon"
               className="absolute bottom-3 right-3 h-11 w-11 sm:bottom-4 sm:right-4 sm:h-12 sm:w-12 rounded-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 shadow-lg shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
               disabled={isLoading || !userInput.trim()}
             >
@@ -440,23 +429,22 @@ const GAssistChatbot = () => {
           </div>
 
           {/* Action Buttons with beautiful styling */}
-          {/* MODIFIED: Touch targets are h-12 w-12 which is great for mobile. Kept as is. */}
           <div className="flex justify-center gap-4 mt-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button 
-                variant="outline" 
-                size="icon" 
+              <Button
+                variant="outline"
+                size="icon"
                 className="h-12 w-12 rounded-full border border-white/30 bg-white/10 backdrop-blur-lg hover:bg-white/20 disabled:opacity-50"
                 disabled={isLoading}
               >
                 <Mic className="h-5 w-5 text-cyan-300" />
               </Button>
             </motion.div>
-            
+
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button 
-                variant="outline" 
-                size="icon" 
+              <Button
+                variant="outline"
+                size="icon"
                 className="h-12 w-12 rounded-full border border-white/30 bg-white/10 backdrop-blur-lg hover:bg-white/20 disabled:opacity-50"
                 disabled={isLoading}
               >
@@ -467,24 +455,23 @@ const GAssistChatbot = () => {
         </div>
 
         {/* Features Section with beautiful cards */}
-        {/* MODIFIED: Reduced padding for mobile. The grid layout is already responsive (grid-cols-1 md:grid-cols-3) */}
         <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-900/30 to-green-900/30 border-t border-white/10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { 
-                icon: <Zap className="h-6 w-6 text-yellow-400" />, 
-                title: "Google Gemini", 
-                desc: "Powered by cutting-edge AI" 
+              {
+                icon: <Zap className="h-6 w-6 text-yellow-400" />,
+                title: "Google Gemini",
+                desc: "Powered by cutting-edge AI"
               },
-              { 
-                icon: <Sparkles className="h-6 w-6 text-cyan-400" />, 
-                title: "Free to Use", 
-                desc: "No API key required" 
+              {
+                icon: <Sparkles className="h-6 w-6 text-cyan-400" />,
+                title: "Free to Use",
+                desc: "No API key required"
               },
-              { 
-                icon: <Star className="h-6 w-6 text-green-400" fill="currentColor" />, 
-                title: "Lightning Fast", 
-                desc: "Instant AI responses" 
+              {
+                icon: <Star className="h-6 w-6 text-green-400" fill="currentColor" />,
+                title: "Lightning Fast",
+                desc: "Instant AI responses"
               }
             ].map((feature, i) => (
               <motion.div
@@ -504,9 +491,9 @@ const GAssistChatbot = () => {
           </div>
         </div>
       </motion.div>
-      
+
       {/* Footer with subtle animation */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}

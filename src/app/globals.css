@@ -1,9 +1,9 @@
 /* FILE: src/app/globals.css */
-/* --- PASTE THIS ENTIRE CODE BLOCK --- */
 
 /* This is the modern v4+ way to import Tailwind's styles */
 @import "tailwindcss";
 
+/* The rest of your file is correct and can remain */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -33,11 +33,4 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Hide scrollbar for webkit browsers */
-.overflow-y-auto::-webkit-scrollbar {
-  display: none;
 }

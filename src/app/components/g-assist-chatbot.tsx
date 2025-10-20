@@ -1,291 +1,195 @@
+// FILE: src/app/g-assist-chatbot.tsx (or wherever you have it)
+// --- PASTE THIS ENTIRE CODE BLOCK ---
+
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Mic, Waves, Volume2, VolumeX } from "lucide-react";
+import { Button } from "./ui/button"; // Assuming ./ui/button exists
+import { Textarea } from "./ui/textarea"; // Assuming ./ui/textarea exists
+import { Send, Sparkles } from "lucide-react";
 
-// --- HELPER COMPONENTS ---
-
-// 1. Pouring Stream Component (for initial load and AI thinking)
-const PouringStream = () => (
-  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-full w-4 overflow-hidden pointer-events-none z-20">
-    <motion.div
-      className="w-full h-full bg-gradient-to-b from-cyan-300/90 via-cyan-400/70 to-transparent"
-      initial={{ y: "-100%" }}
-      animate={{ y: "0%" }}
-      transition={{ duration: 2, ease: "linear" }}
-      style={{
-        clipPath: "polygon(10% 0, 90% 0, 100% 100%, 0% 100%)",
-      }}
-    />
-  </div>
-);
-
-
-// 2. Water Bubble Component
-const WaterBubble = ({ delay = 0, size = "medium", position, speed = "medium" }) => {
-  const sizes = { small: "w-1 h-1", medium: "w-2 h-2", large: "w-3 h-3" };
-  const durations = { slow: 12, medium: 8, fast: 5 };
-
+// SVG Shape Component - for the perfect curve
+const SwoopShape = () => {
   return (
-    <motion.div
-      className={`absolute ${sizes[size]} bubble-particle`}
-      style={{ left: `${position}%`, animationDelay: `${delay}s` }}
-      animate={{
-        y: ["0%", "-100vh"],
-        x: [0, Math.random() * 20 - 10, 0, Math.random() * 20 - 10, 0],
-        opacity: [0.8, 0.8, 0],
-      }}
-      transition={{
-        duration: Math.random() * 5 + durations[speed],
-        repeat: Infinity,
-        ease: "linear",
-      }}
-    />
+    <svg
+      className="absolute bottom-0 left-0 w-full h-auto text-[#E9E8F5]"
+      viewBox="0 0 1440 100"
+      preserveAspectRatio="none"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true" // Decorative element
+    >
+      {/* This path creates the specific asymmetrical curve */}
+      <path d="M1440 100H0V0C480 33.3333 960 66.6667 1440 0V100Z"></path>
+    </svg>
   );
 };
 
-// 3. Ripple Effect Component
-const Ripple = ({ x, y, onComplete }) => {
+// Background particles Component
+const NUM_PARTICLES = 15;
+function generateParticles() {
+  return Array.from({ length: NUM_PARTICLES }, () => ({
+    top: Math.random() * 100, left: Math.random() * 100,
+    width: Math.random() * 20 + 5, height: Math.random() * 20 + 5,
+    x: Math.random() * 30 - 15, duration: Math.random() * 5 + 5,
+  }));
+}
+const FloatingParticles = () => {
+  const [particles, setParticles] = useState<Array<any>>([]);
+  useEffect(() => { setParticles(generateParticles()); }, []);
   return (
-    <motion.div
-      className="absolute pointer-events-none rounded-full border-2 border-cyan-200/80"
-      style={{ left: x - 20, top: y - 20, width: 40, height: 40 }}
-      initial={{ scale: 0, opacity: 1 }}
-      animate={{ scale: 3, opacity: 0 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
-      onAnimationComplete={onComplete}
-    />
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p, i) => (
+        <motion.div key={i} className="absolute rounded-full bg-gradient-to-r from-blue-400/10 to-green-400/10"
+          style={{ top: `${p.top}%`, left: `${p.left}%`, width: `${p.width}px`, height: `${p.height}px` }}
+          animate={{ y: [0, -20, 0], x: [0, p.x, 0], opacity: [0.2, 0.5, 0.2] }}
+          transition={{ duration: p.duration, repeat: Infinity, ease: "easeInOut" }}
+        />
+      ))}
+    </div>
   );
 };
 
-
-// --- MAIN CHATBOT COMPONENT ---
+// Main Chatbot Component
 const GAssistChatbot = () => {
+  const [placeholderText, setPlaceholderText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loopNum, setLoopNum] = useState(0);
+  const [typingSpeed, setTypingSpeed] = useState(150);
   const [userInput, setUserInput] = useState("");
-  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [waterLevel, setWaterLevel] = useState(0); // For initial fill animation
-  const [ripples, setRipples] = useState([]);
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  // Animate water filling on component mount
+  const [messages, setMessages] = useState<Array<{id: string, role: string, content: string}>>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
-    const timer = setTimeout(() => setWaterLevel(100), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Auto-scroll to the bottom of messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Function to create a ripple effect
-  const createRipple = (e) => {
-    const newRipple = {
-      id: Date.now(),
-      x: e.clientX,
-      y: e.clientY,
+    const prompts = [ "Ask me anything...", "Get help with coding...", "Explore creative ideas...", ];
+    const handleTyping = () => {
+      const i = loopNum % prompts.length; const fullText = prompts[i];
+      setPlaceholderText(isDeleting ? fullText.substring(0, placeholderText.length - 1) : fullText.substring(0, placeholderText.length + 1));
+      setTypingSpeed(isDeleting ? 30 : 150);
+      if (!isDeleting && placeholderText === fullText) { setTimeout(() => setIsDeleting(true), 2000); }
+      else if (isDeleting && placeholderText === "") { setIsDeleting(false); setLoopNum(loopNum + 1); }
     };
-    setRipples(prev => [...prev, newRipple]);
-  };
+    const timer = setTimeout(handleTyping, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [placeholderText, isDeleting, loopNum, typingSpeed]);
+  
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isTyping]);
+  
+  useEffect(() => {
+    if (isLoading) { const timer = setTimeout(() => setIsTyping(true), 500); return () => clearTimeout(timer); }
+    else { setIsTyping(false); }
+  }, [isLoading]);
 
-  const handleRippleComplete = (id) => {
-    setRipples(prev => prev.filter(r => r.id !== id));
+  const handleSubmit = async (e: React.FormEvent | React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault(); if (!userInput.trim()) return;
+    const newUserMessage = { id: Date.now().toString(), role: "user", content: userInput };
+    setMessages(prev => [...prev, newUserMessage]);
+    const currentInput = userInput; setUserInput(""); setIsLoading(true);
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST", headers: { "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || ''}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ "model": "google/gemini-pro", "messages": [{ "role": "user", "content": currentInput }] })
+      });
+      if (!response.ok) { throw new Error(`API Error: ${response.statusText}`); }
+      const data = await response.json();
+      const aiResponse = { id: (Date.now() + 1).toString(), role: "assistant", content: data.choices?.[0]?.message?.content || "Sorry, I couldn't get a response." };
+      setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Error fetching from API:", error);
+      const errorMessage = { id: (Date.now() + 2).toString(), role: "assistant", content: "An error occurred. Please try again." };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally { setIsLoading(false); }
   };
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!userInput.trim() || isLoading) return;
-
-    const newUserMessage = {
-      id: Date.now(),
-      role: "user",
-      content: userInput,
-    };
-    setMessages(prev => [...prev, newUserMessage]);
-    setUserInput("");
-    setIsLoading(true);
-
-    // --- API Call Simulation ---
-    // Simulating a delay and then a response
-    setTimeout(() => {
-      const aiResponse = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: `This is a simulated response to: "${userInput}"`,
-      };
-      setMessages(prev => [...prev, aiResponse]);
-      setIsLoading(false);
-      // Create a ripple where the new AI message appears
-      createRipple({ clientX: window.innerWidth * 0.25, clientY: window.innerHeight - 250 });
-    }, 2500);
-  };
-
   return (
-    // Main container using the water theme from globals.css
-    <div className="min-h-screen relative overflow-hidden bg-blue-500">
-      
-      {/* --- WATER & BUBBLE BACKGROUND --- */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none">
-        {/* The main rising water body */}
-        <motion.div
-          className="absolute bottom-0 left-0 w-full water-gradient"
-          initial={{ height: "0%" }}
-          animate={{ height: `${waterLevel}%` }}
-          transition={{ duration: 5, ease: "easeOut" }}
-        >
-          {/* Animated SVG Waves on surface */}
-          <div className="absolute -top-1 left-0 w-full h-8">
-              <svg
-                className="w-full h-full"
-                viewBox="0 0 500 20"
-                preserveAspectRatio="none"
-              >
-                  <path
-                      className="water-wave"
-                      fill="rgba(var(--water-primary), 0.8)"
-                      style={{ animation: 'wave 4s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite' }}
-                  />
-              </svg>
-          </div>
-          {/* Underwater light rays */}
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="light-ray" style={{ left: `${i * 20}%`, animationDelay: `${i * 1.2}s`, transform: `translateX(${Math.random() * 20 - 10}px)` }}/>
-          ))}
-        </motion.div>
-        
-        {/* Pouring stream during initial load */}
-        {waterLevel < 100 && <PouringStream />}
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
+      <FloatingParticles />
+      <motion.div
+        initial={{ opacity: 0, y: 50, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md h-[85vh] max-h-[750px] flex flex-col relative z-10"
+      >
+        {/* ============================ TOP DARK PANEL ============================ */}
+        <div className="relative flex-shrink-0 h-[65%] bg-black/30 backdrop-blur-2xl rounded-t-3xl border-b-0 border-white/10 shadow-2xl z-20 pb-10">
+            <div className="h-full flex flex-col">
+                <div className="absolute top-0 left-0 right-0 p-5 text-center z-10">
+                    <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-2xl font-bold text-white tracking-wide">
+                        G-Assist
+                    </motion.h1>
+                </div>
+                
+                <div className="flex-grow overflow-y-auto px-6 pt-20" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    {messages.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-4 -mt-10">
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="mb-4 p-3 rounded-full bg-gradient-to-r from-blue-500/20 to-green-500/20">
+                            <Sparkles className="h-8 w-8 text-blue-300" />
+                        </motion.div>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="text-blue-200 max-w-md text-sm">
+                            How can I help you today?
+                        </motion.p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <AnimatePresence>
+                          {messages.map((msg) => (
+                            <motion.div key={msg.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-white ${ msg.role === 'user' ? 'bg-blue-600 rounded-br-none' : 'bg-white/10 rounded-bl-none' }`}>
+                                <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                        {isTyping && (
+                          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                            <div className="bg-white/10 rounded-2xl rounded-bl-none px-4 py-3">
+                              <div className="flex items-center space-x-1">
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.3s]"></div>
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.15s]"></div>
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"></div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
+                    )}
+                </div>
+            </div>
+            <div className="absolute -bottom-px left-0 w-full z-10">
+                 <SwoopShape />
+            </div>
+        </div>
 
-        {/* Ambient & Turbulent Bubbles */}
-        {waterLevel > 10 && (
-          <>
-            {/* Ambient slow bubbles */}
-            {[...Array(15)].map((_, i) => (
-              <WaterBubble key={`amb-${i}`} delay={i * 0.8} position={Math.random() * 100} speed="slow" size={["small", "medium"][i%2]} />
-            ))}
-            {/* Turbulent fast bubbles in the center */}
-            {[...Array(20)].map((_, i) => (
-              <WaterBubble key={`turb-${i}`} delay={i * 0.2} position={Math.random() * 40 + 30} speed="fast" size="small" />
-            ))}
-          </>
-        )}
-      </div>
-
-      {/* Ripple Effects Container */}
-      <AnimatePresence>
-        {ripples.map((ripple) => (
-          <Ripple key={ripple.id} x={ripple.x} y={ripple.y} onComplete={() => handleRippleComplete(ripple.id)} />
-        ))}
-      </AnimatePresence>
-
-      {/* --- UI & CHAT CONTENT --- */}
-      <div className="relative z-10 flex flex-col h-screen">
-        {/* Header */}
-        <header className="bg-white/10 backdrop-blur-md p-4 border-b border-white/20">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white tracking-wide">Aqua AI</h1>
-            <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              {soundEnabled ? <Volume2 className="h-5 w-5 text-white" /> : <VolumeX className="h-5 w-5 text-white" />}
-            </button>
-          </div>
-        </header>
-
-        {/* Chat Area */}
-        <main className="flex-1 max-w-4xl mx-auto w-full p-4 overflow-y-auto">
-          <div className="space-y-6 pb-24">
-            {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 150, damping: 20 }}
-                className={`flex items-end gap-2 message-float ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-2xl p-3 text-white ${
-                    msg.role === 'user'
-                      ? 'bg-blue-500/50'
-                      : 'bg-cyan-500/40'
-                  }`}
-                  style={{ backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.2)' }}
+        {/* =========================== BOTTOM LIGHT PANEL =========================== */}
+        <div className="flex-grow flex flex-col bg-[#E9E8F5] rounded-b-3xl p-6 relative z-10 shadow-inner">
+            <form onSubmit={handleSubmit} className="relative">
+                <Textarea
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder={placeholderText}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e); } }}
+                  className="min-h-[80px] w-full rounded-2xl border border-gray-300 bg-white p-4 pr-14 text-base text-gray-800 placeholder:text-gray-500/80 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 resize-none shadow-sm"
+                  disabled={isLoading}
+                  rows={3}
+                />
+                <Button 
+                  type="submit"
+                  size="icon" 
+                  className="absolute bottom-3 right-3 h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 hover:opacity-90 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  disabled={isLoading || !userInput.trim()}
+                  aria-label="Send message"
                 >
-                  <p>{msg.content}</p>
-                </div>
-              </motion.div>
-            ))}
-
-            {isLoading && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex justify-start message-float"
-              >
-                <div className="bg-cyan-500/40 backdrop-blur-md rounded-2xl p-3 border border-white/20">
-                    <motion.div
-                      animate={{ y: [0, -4, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <Waves className="h-6 w-6 text-white" />
-                    </motion.div>
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </main>
-        
-        {/* Glassy Floating Input Bar */}
-        <footer className="fixed bottom-0 left-0 right-0 p-4 z-20">
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 100 }}
-            className="max-w-4xl mx-auto p-2 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg"
-          >
-            <form onSubmit={handleSubmit} className="flex items-center gap-2">
-              <button type="button" className="p-2 text-white/80 hover:text-white">
-                <Mic className="h-5 w-5" />
-              </button>
-              <textarea
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={(e) => {
-                  createRipple({ 
-                    clientX: e.currentTarget.getBoundingClientRect().left + 50,
-                    clientY: e.currentTarget.getBoundingClientRect().top + 20,
-                  });
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit(e);
-                  }
-                }}
-                placeholder="Ask me anything..."
-                className="flex-1 min-h-[40px] max-h-[120px] bg-transparent text-white placeholder:text-white/60 resize-none p-2 focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !userInput.trim()}
-                className="p-3 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 disabled:cursor-not-allowed transition-colors"
-              >
-                <Send className="h-5 w-5 text-white" />
-              </button>
+                  <Send className="h-5 w-5 text-white" />
+                </Button>
             </form>
-          </motion.div>
-        </footer>
-      </div>
-
-      {/* Underwater Ambient Sound */}
-      {soundEnabled && (
-        <audio autoPlay loop>
-          {/* Make sure you have this audio file in your /public folder */}
-          <source src="/underwater-ambience.mp3" type="audio/mpeg" />
-        </audio>
-      )}
+             <div className="mt-auto text-center text-xs text-gray-400 pt-4">
+                <p>Powered by Google Gemini</p>
+             </div>
+        </div>
+      </motion.div>
     </div>
   );
 };
